@@ -90,6 +90,29 @@ namespace UnitTests
             mods.ForEach(mod => CheckRequirements(sortedMods, mod));
         }
 
+        [TestMethod]
+        public void SlowLoadTest()
+        {
+            //   a 
+            //  / \
+            // d - e - c - b
+
+            var a = new Mod("a");
+            var b = new Mod("b");
+            var c = new Mod("c", loadBefore: Mods("b"));
+            var d = new Mod("d", loadBefore: Mods("a"));
+            var e = new Mod("e", loadAfter: Mods("d"), loadBefore: Mods("c"));
+            var f = new Mod("f");
+            var g = new Mod("g");
+
+            var mods = new List<IMod>() { a, b, c, d, e, f, g };
+
+            var sortedMods = Program.Sort(mods);
+
+            CheckModCount(mods, sortedMods);
+            mods.ForEach(mod => CheckRequirements(sortedMods, mod));
+        }
+
 
         private void CheckModCount(List<IMod> mods, List<IMod> sortedMods)
         {

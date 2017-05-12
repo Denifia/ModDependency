@@ -35,6 +35,15 @@ namespace ConsoleApp
             _manifest = new Manifest(id);
         }
 
+        public Mod(string id, string[] loadBefore = null, string[] loadAfter = null)
+        {
+            _manifest = new Manifest(id)
+            {
+                LoadBefore = loadBefore ?? null,
+                LoadAfter = loadAfter ?? null
+            };
+        }
+
         public void Entry()
         {
             Console.WriteLine($"Called entry for {_manifest.UniqueID}");
@@ -44,6 +53,8 @@ namespace ConsoleApp
     public interface IManifest
     {
         string UniqueID { get; set; }
+        string[] LoadBefore { get; set; }
+        string[] LoadAfter { get; set; }
     }
 
     public class Manifest : IManifest
@@ -53,6 +64,8 @@ namespace ConsoleApp
             get => _uniqueID;
             set => _uniqueID = value;
         }
+        public string[] LoadBefore { get; set; }
+        public string[] LoadAfter { get; set; }
 
         public Manifest(string id)
         {

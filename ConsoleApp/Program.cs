@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,50 +11,67 @@ namespace ConsoleApp
     {
         public static void Main(string[] args)
         {
+            var a = new Mod("a");
+            var b = new Mod("b", loadBefore: Mods("a"));
+            var mods = new List<IMod>() { a, b };
 
+            Console.WriteLine("INPUT");
+            Console.WriteLine("-----");
+            foreach (var mod in mods)
+            {
+                Console.WriteLine($"\"{mod.ModManifest.UniqueID}\" \n  LoadsBefore: {string.Join(", ", mod.ModManifest.LoadBefore)} \n  LoadsAfter: {string.Join(", ", mod.ModManifest.LoadAfter)}");
+            }
+
+            var sortedMods = Sort(mods.ToArray());
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("OUTPUT");
+            Console.WriteLine("------");
+            foreach (var mod in sortedMods)
+            {
+                Console.WriteLine($"Loaded \"{mod.ModManifest.UniqueID}\" \n  LoadsBefore: {string.Join(", ", mod.ModManifest.LoadBefore)} \n  LoadsAfter: {string.Join(", ", mod.ModManifest.LoadAfter)}");
+            }
+            Console.ReadLine();
         }
+
+        private static List<IMod> UnsortedMods = new List<IMod>();
 
         public static IMod[] Sort(IMod[] mods)
         {
-            // Kahn's algorithm (https://en.wikipedia.org/wiki/Topological_sorting)
-            //L ← Empty list that will contain the sorted elements
-            //S ← Set of all nodes with no incoming edges
-            //while S is non-empty do
-            //    remove a node n from S
-            //    add n to tail of L
-            //    for each node m with an edge e from n to m do
-            //        remove edge e from the graph
-            //        if m has no other incoming edges then
-            //            insert m into S
-            //if graph has edges then
-            //    return error (graph has at least one cycle)
-            //else 
-            //    return L (a topologically sorted order)
+            UnsortedMods = mods.ToList();
+            var sortedMods = new Stack<IMod>();
+            var visitedMods = new bool[mods.Length];
 
-            var unsortedMods = mods.ToList();
-            var sortedMods = new List<IMod>();
-            var modsWithIssues = new Dictionary<string, string>();
+            for (int modIndex = 0; modIndex < mods.Length; modIndex++)
+                if (visitedMods[modIndex] == false)
+                    TopologicalSort(modIndex, visitedMods, sortedMods);
 
-            do
-            {
-                var mod = unsortedMods[0];
-                unsortedMods.RemoveAt(0);
-                //foreach (var modId in mod.ModManifest.LoadBefore)
-                //{
-                //    if (ModIdFoundInList(modId, sortedMods))
-                //    {
-
-                //    }
-                //}
-                sortedMods.Add(mod);
-            } while (unsortedMods.Any());
-                
-            return sortedMods.ToArray();
+            return sortedMods.Reverse().ToArray();
         }
 
-        public static bool ModIdFoundInList(string modId, List<IMod> mods)
+        private static void TopologicalSort(int modIndex, bool[] visitedMods, Stack<IMod> sortedMods)
         {
-            return mods.Any(x => x.ModManifest.UniqueID.Equals(modId));
+            visitedMods[modIndex] = true;
+            var mod = UnsortedMods[modIndex];
+            var modsToLoadFirst = UnsortedMods.Where(x =>
+                mod.ModManifest.LoadAfter.Contains(x.ModManifest.UniqueID) ||
+                x.ModManifest.LoadBefore.Contains(mod.ModManifest.UniqueID)
+            ).ToList();
+
+            foreach (var requiredMod in modsToLoadFirst)
+            {
+                var index = UnsortedMods.IndexOf(requiredMod);
+                if (!visitedMods[index])
+                    TopologicalSort(index, visitedMods, sortedMods);
+            }
+
+            sortedMods.Push(mod);
+        }
+
+        public static string[] Mods(params string[] mods)
+        {
+            return mods;
         }
     }
 

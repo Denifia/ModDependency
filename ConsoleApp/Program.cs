@@ -22,7 +22,7 @@ namespace ConsoleApp
                 Console.WriteLine($"\"{mod.ModManifest.UniqueID}\" \n  LoadsBefore: {string.Join(", ", mod.ModManifest.LoadBefore)} \n  LoadsAfter: {string.Join(", ", mod.ModManifest.LoadAfter)}");
             }
 
-            var sortedMods = Sort(mods.ToArray());
+            var sortedMods = Sort(mods);
 
             Console.WriteLine();
             Console.WriteLine();
@@ -37,17 +37,21 @@ namespace ConsoleApp
 
         private static List<IMod> UnsortedMods = new List<IMod>();
 
-        public static IMod[] Sort(IMod[] mods)
+        public static List<IMod> Sort(List<IMod> mods)
         {
-            UnsortedMods = mods.ToList();
+            UnsortedMods = mods;
             var sortedMods = new Stack<IMod>();
-            var visitedMods = new bool[mods.Length];
+            var visitedMods = new bool[mods.Count];
 
-            for (int modIndex = 0; modIndex < mods.Length; modIndex++)
+            for (int modIndex = 0; modIndex < mods.Count; modIndex++)
+            {
                 if (visitedMods[modIndex] == false)
+                {
                     TopologicalSort(modIndex, visitedMods, sortedMods);
-
-            return sortedMods.Reverse().ToArray();
+                }
+            }
+            
+            return sortedMods.Reverse().ToList();
         }
 
         private static void TopologicalSort(int modIndex, bool[] visitedMods, Stack<IMod> sortedMods)
@@ -63,7 +67,9 @@ namespace ConsoleApp
             {
                 var index = UnsortedMods.IndexOf(requiredMod);
                 if (!visitedMods[index])
+                {
                     TopologicalSort(index, visitedMods, sortedMods);
+                }
             }
 
             sortedMods.Push(mod);

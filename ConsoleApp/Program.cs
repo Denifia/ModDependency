@@ -22,9 +22,9 @@ namespace ConsoleApp
             var mods = new List<IMod>() { a, b, c, d, e, f, g };
 
             // Circular
-            var a = new Mod("a", loadBefore: Mods("b"));
-            var b = new Mod("b", loadBefore: Mods("a"));
-            var mods = new List<IMod>() { a, b };
+            //var a = new Mod("a", loadBefore: Mods("b"));
+            //var b = new Mod("b", loadBefore: Mods("a"));
+            //var mods = new List<IMod>() { a, b };
 
             Console.WriteLine("INPUT");
             Console.WriteLine("-----");

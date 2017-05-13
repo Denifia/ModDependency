@@ -86,11 +86,13 @@ namespace ConsoleApp
                 x.ModManifest.LoadBefore.Contains(mod.ModManifest.UniqueID)
             ).ToList();
 
-            var circularReference = currentChain.FirstOrDefault(x => modsToLoadFirst.Contains(x));
-            if (circularReference != null)
+            // TODO: Add code to check for missing mods
+
+            var circularMods = currentChain.FirstOrDefault(x => modsToLoadFirst.Contains(x));
+            if (circularMods != null)
             {
                 Console.WriteLine($"Circular reference found.");
-                var chain = $"{mod.ModManifest.UniqueID} -> {circularReference.ModManifest.UniqueID}";
+                var chain = $"{mod.ModManifest.UniqueID} -> {circularMods.ModManifest.UniqueID}";
                 for (int i = currentChain.Count - 1; i >= 0; i--)
                 {
                     chain = $"{currentChain[i].ModManifest.UniqueID} -> " + chain;

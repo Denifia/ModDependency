@@ -113,6 +113,21 @@ namespace UnitTests
             mods.ForEach(mod => CheckRequirements(sortedMods, mod));
         }
 
+        [TestMethod]
+        public void MissingModTest()
+        {
+            //   b - a
+
+            var a = new Mod("a", loadAfter: Mods("b"));
+
+            var mods = new List<IMod>() { a };
+
+            var sortedMods = Program.Sort(mods);
+
+            CheckModCount(mods, sortedMods);
+            mods.ForEach(mod => CheckRequirements(sortedMods, mod));
+        }
+
 
         private void CheckModCount(List<IMod> mods, List<IMod> sortedMods)
         {
